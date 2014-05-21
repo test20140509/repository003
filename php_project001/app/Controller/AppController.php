@@ -38,7 +38,8 @@ class AppController extends Controller {
 							'Actions' => array('actionPath' => 'controllers')
 					)
 			),
-			'Session'
+			'Session',
+			'DebugKit.Toolbar'
 	);
 
 	public $helpers = array('Html', 'Form', 'Session');
