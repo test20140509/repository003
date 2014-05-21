@@ -1,3 +1,6 @@
+<?php echo $this->Html->script('fadeout'); ?>
+<?php echo $this->Html->link('fadeout_link', '/', array('id' => 'fadeout_link_id')); ?>
+
 <div class="users index">
 	<h2><?php echo __('Users'); ?></h2>
 	<table cellpadding="0" cellspacing="0">

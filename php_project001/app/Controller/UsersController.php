@@ -15,6 +15,11 @@ class UsersController extends AppController {
  */
 	public $components = array('Paginator');
 
+	/**
+	 * @var unknown
+	 */
+	public $helpers = array('Js' => array('Jquery'));
+
 	/* (non-PHPdoc)
 	 * @see Controller::beforeFilter()
 	 */
