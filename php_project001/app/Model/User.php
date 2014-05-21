@@ -1,5 +1,6 @@
 <?php
 App::uses('AppModel', 'Model');
+App::uses('AuthComponent', 'Controller/Component');
 /**
  * User Model
  *
@@ -63,6 +64,30 @@ class User extends AppModel {
 		)
 	);
 
+	/**
+	 * @var unknown
+	 */
+	public $actsAs = array('Acl' => array('type' => 'requester'));
+
+	/**
+	 * @return NULL|multitype:multitype:Ambigous <string, boolean, mixed>  
+	 */
+	public function parentNode() {
+		if (!$this->id && empty($this->data)) {
+			return null;
+		}
+		if (isset($this->data['User']['group_id'])) {
+			$groupId = $this->data['User']['group_id'];
+		} else {
+			$groupId = $this->field('group_id');
+		}
+		if (!$groupId) {
+			return null;
+		} else {
+			return array('Group' => array('id' => $groupId));
+		}
+	}
+
 /**
  * hasMany associations
  *
@@ -84,4 +109,11 @@ class User extends AppModel {
 		)
 	);
 
+	/* (non-PHPdoc)
+	 * @see Model::beforeSave()
+	 */
+	public function beforeSave($options = array()) {
+		$this->data['User']['password'] = AuthComponent::password($this->data['User']['password']);
+		return true;
+	}
 }

@@ -25,6 +25,18 @@ class Group extends AppModel {
 		),
 	);
 
+	/**
+	 * @var unknown
+	 */
+	public $actsAs = array('Acl' => array('type' => 'requester'));
+
+	/**
+	 * @return NULL
+	 */
+	public function parentNode() {
+		return null;
+	}
+
 	//The Associations below have been created with all possible keys, those that are not needed can be removed
 
 /**

@@ -15,6 +15,19 @@ class GroupsController extends AppController {
  */
 	public $components = array('Paginator');
 
+	/* (non-PHPdoc)
+	 * @see Controller::beforeFilter()
+	 */
+	public function beforeFilter() {
+		parent::beforeFilter();
+	
+		// CakePHP 2.0
+		$this->Auth->allow('*');
+	
+		// CakePHP 2.1以上
+		$this->Auth->allow();
+	}
+
 /**
  * index method
  *

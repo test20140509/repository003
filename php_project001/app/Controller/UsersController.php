@@ -15,6 +15,19 @@ class UsersController extends AppController {
  */
 	public $components = array('Paginator');
 
+	/* (non-PHPdoc)
+	 * @see Controller::beforeFilter()
+	 */
+	public function beforeFilter() {
+		parent::beforeFilter();
+	
+		// CakePHP 2.0
+		$this->Auth->allow('*');
+	
+		// CakePHP 2.1以上
+		$this->Auth->allow();
+	}
+
 /**
  * index method
  *
@@ -104,5 +117,24 @@ class UsersController extends AppController {
 			$this->Session->setFlash(__('The user could not be deleted. Please, try again.'));
 		}
 		return $this->redirect(array('action' => 'index'));
+	}
+
+	/**
+	 * 
+	 */
+	public function login() {
+		if ($this->request->is('post')) {
+			if ($this->Auth->login()) {
+				return $this->redirect($this->Auth->redirect());
+			}
+			$this->Session->setFlash(__('Your username or password was incorrect.'));
+		}
+	}
+
+	/**
+	 * 
+	 */
+	public function logout() {
+		//ここは、今は空にしておいてください
 	}
 }
