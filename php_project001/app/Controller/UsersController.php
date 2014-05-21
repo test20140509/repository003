@@ -120,14 +120,11 @@ class UsersController extends AppController {
 	}
 
 	/**
-	 * 
 	 */
 	public function login() {
-		if ($this->request->is('post')) {
-			if ($this->Auth->login()) {
-				return $this->redirect($this->Auth->redirect());
-			}
-			$this->Session->setFlash(__('Your username or password was incorrect.'));
+		if ($this->Session->read ( 'Auth.User' )) {
+			$this->Session->setFlash ( 'You are logged in!' );
+			$this->redirect ( '/', null, false );
 		}
 	}
 
@@ -135,6 +132,7 @@ class UsersController extends AppController {
 	 * 
 	 */
 	public function logout() {
-		//ここは、今は空にしておいてください
+		$this->Session->setFlash('Good-Bye');
+		$this->redirect($this->Auth->logout());
 	}
 }
