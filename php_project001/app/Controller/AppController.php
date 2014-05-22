@@ -42,7 +42,12 @@ class AppController extends Controller {
 			'DebugKit.Toolbar'
 	);
 
-	public $helpers = array('Html', 'Form', 'Session');
+	public $helpers = array(
+			'Session',
+			'Html' => array('className' => 'TwitterBootstrap.BootstrapHtml'),
+			'Form' => array('className' => 'TwitterBootstrap.BootstrapForm'),
+			'Paginator' => array('className' => 'TwitterBootstrap.BootstrapPaginator'),
+	);
 
 	public function beforeFilter() {
 		//AuthComponentの設定
