@@ -6,11 +6,6 @@
 			<?php echo h($post['Post']['id']); ?>
 			&nbsp;
 		</dd>
-		<dt><?php echo __('User'); ?></dt>
-		<dd>
-			<?php echo $this->Html->link($post['User']['id'], array('controller' => 'users', 'action' => 'view', $post['User']['id'])); ?>
-			&nbsp;
-		</dd>
 		<dt><?php echo __('Title'); ?></dt>
 		<dd>
 			<?php echo h($post['Post']['title']); ?>
@@ -19,6 +14,11 @@
 		<dt><?php echo __('Body'); ?></dt>
 		<dd>
 			<?php echo h($post['Post']['body']); ?>
+			&nbsp;
+		</dd>
+		<dt><?php echo __('Author Id'); ?></dt>
+		<dd>
+			<?php echo h($post['Post']['author_id']); ?>
 			&nbsp;
 		</dd>
 		<dt><?php echo __('Created'); ?></dt>
