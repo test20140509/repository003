@@ -18,7 +18,7 @@
 	}
 	</style>
 	<?php echo $this->Html->css('bootstrap-responsive.min'); ?>
-	<?php echo $this->Html->script('jquery-2.1.1.min'); ?>
+
 	<!-- Le HTML5 shim, for IE6-8 support of HTML5 elements -->
 	<!--[if lt IE 9]>
 	<script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
