@@ -4,24 +4,28 @@ App::uses('AppController', 'Controller');
  * Posts Controller
  *
  * @property Post $Post
- * @property PaginatorComponent $Paginator
  */
 class PostsController extends AppController {
 
-/**
- * Components
- *
- * @var array
- */
-	public $components = array('Paginator');
-
-	/* (non-PHPdoc)
-	 * @see Controller::beforeFilter()
+	/**
+	 * @var unknown
 	 */
-	public function beforeFilter() {
-		parent::beforeFilter();
-		$this->Auth->allow('index', 'view');
-	}
+	public $components = array('Search.Prg' => array(
+		'commonProcess' => array(
+			'paramType' => 'querystring',
+		)
+	));
+
+	/**
+	 * @var unknown
+	 */
+	public $presetVars = array(
+		'author_id' => array('type' => 'checkbox', 'empty' => true),
+		'keyword' => array('type' => 'value', 'empty' => true),
+		'andor' => array('type' => 'value', 'empty' => true),
+		'from' => array('type' => 'value', 'empty' => true),
+		'to' => array('type' => 'value', 'empty' => true),
+	);
 
 /**
  * index method
@@ -30,22 +34,36 @@ class PostsController extends AppController {
  */
 	public function index() {
 		$this->Post->recursive = 0;
-		$this->set('posts', $this->Paginator->paginate());
+		$authors = $this->Post->Author->find('list');
+		$this->set(compact('authors'));
+
+		$this->Prg->commonProcess();
+		$req = $this->request->query;
+		if (!empty($this->request->query['keyword'])) {
+			$andor = !empty($this->request->query['andor']) ? $this->request->query['andor'] : null;
+			$word = $this->Post->multipleKeywords($this->request->query['keyword'], $andor);
+			$req = array_merge($req, array("word" => $word));
+		}
+		$this->paginate = array(
+			'conditions' => $this->Post->parseCriteria($req),
+			'paramType' => 'querystring',
+		);
+		$this->set('posts', $this->paginate());
 	}
 
 /**
  * view method
  *
- * @throws NotFoundException
  * @param string $id
+ * @throws NotFoundException
  * @return void
  */
 	public function view($id = null) {
-		if (!$this->Post->exists($id)) {
-			throw new NotFoundException(__('Invalid post'));
+		$this->Post->id = $id;
+		if (!$this->Post->exists()) {
+			throw new NotFoundException(__('Invalid %s', __('post')));
 		}
-		$options = array('conditions' => array('Post.' . $this->Post->primaryKey => $id));
-		$this->set('post', $this->Post->find('first', $options));
+		$this->set('post', $this->Post->read(null, $id));
 	}
 
 /**
@@ -57,60 +75,105 @@ class PostsController extends AppController {
 		if ($this->request->is('post')) {
 			$this->Post->create();
 			if ($this->Post->save($this->request->data)) {
-				$this->Session->setFlash(__('The post has been saved.'));
-				return $this->redirect(array('action' => 'index'));
+				$this->Session->setFlash(
+					__('The %s has been saved', __('post')),
+					'alert',
+					array(
+						'plugin' => 'TwitterBootstrap',
+						'class' => 'alert-success'
+					)
+				);
+				$this->redirect(array('action' => 'index'));
 			} else {
-				$this->Session->setFlash(__('The post could not be saved. Please, try again.'));
+				$this->Session->setFlash(
+					__('The %s could not be saved. Please, try again.', __('post')),
+					'alert',
+					array(
+						'plugin' => 'TwitterBootstrap',
+						'class' => 'alert-error'
+					)
+				);
 			}
 		}
-		$users = $this->Post->User->find('list');
-		$this->set(compact('users'));
+		$authors = $this->Post->Author->find('list');
+		$this->set(compact('authors'));
 	}
 
 /**
  * edit method
  *
- * @throws NotFoundException
  * @param string $id
+ * @throws NotFoundException
  * @return void
  */
 	public function edit($id = null) {
-		if (!$this->Post->exists($id)) {
-			throw new NotFoundException(__('Invalid post'));
+		$this->Post->id = $id;
+		if (!$this->Post->exists()) {
+			throw new NotFoundException(__('Invalid %s', __('post')));
 		}
-		if ($this->request->is(array('post', 'put'))) {
+		if ($this->request->is('post') || $this->request->is('put')) {
 			if ($this->Post->save($this->request->data)) {
-				$this->Session->setFlash(__('The post has been saved.'));
-				return $this->redirect(array('action' => 'index'));
+				$this->Session->setFlash(
+					__('The %s has been saved', __('post')),
+					'alert',
+					array(
+						'plugin' => 'TwitterBootstrap',
+						'class' => 'alert-success'
+					)
+				);
+				$this->redirect(array('action' => 'index'));
 			} else {
-				$this->Session->setFlash(__('The post could not be saved. Please, try again.'));
+				$this->Session->setFlash(
+					__('The %s could not be saved. Please, try again.', __('post')),
+					'alert',
+					array(
+						'plugin' => 'TwitterBootstrap',
+						'class' => 'alert-error'
+					)
+				);
 			}
 		} else {
-			$options = array('conditions' => array('Post.' . $this->Post->primaryKey => $id));
-			$this->request->data = $this->Post->find('first', $options);
+			$this->request->data = $this->Post->read(null, $id);
 		}
-		$users = $this->Post->User->find('list');
-		$this->set(compact('users'));
+		$authors = $this->Post->Author->find('list');
+		$this->set(compact('authors'));
 	}
 
 /**
  * delete method
  *
- * @throws NotFoundException
  * @param string $id
+ * @throws NotFoundException
+ * @throws MethodNotAllowedException
  * @return void
  */
 	public function delete($id = null) {
+		if (!$this->request->is('post')) {
+			throw new MethodNotAllowedException();
+		}
 		$this->Post->id = $id;
 		if (!$this->Post->exists()) {
-			throw new NotFoundException(__('Invalid post'));
+			throw new NotFoundException(__('Invalid %s', __('post')));
 		}
-		$this->request->allowMethod('post', 'delete');
 		if ($this->Post->delete()) {
-			$this->Session->setFlash(__('The post has been deleted.'));
-		} else {
-			$this->Session->setFlash(__('The post could not be deleted. Please, try again.'));
+			$this->Session->setFlash(
+				__('The %s deleted', __('post')),
+				'alert',
+				array(
+					'plugin' => 'TwitterBootstrap',
+					'class' => 'alert-success'
+				)
+			);
+			$this->redirect(array('action' => 'index'));
 		}
-		return $this->redirect(array('action' => 'index'));
+		$this->Session->setFlash(
+			__('The %s was not deleted', __('post')),
+			'alert',
+			array(
+				'plugin' => 'TwitterBootstrap',
+				'class' => 'alert-error'
+			)
+		);
+		$this->redirect(array('action' => 'index'));
 	}
 }

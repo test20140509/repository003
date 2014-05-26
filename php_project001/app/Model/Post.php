@@ -7,6 +7,56 @@ App::uses('AppModel', 'Model');
  */
 class Post extends AppModel {
 
+	/**
+	 * @var unknown
+	 */
+	public $order = array('Post.id DESC');
+
+	/**
+	 * @var unknown
+	 */
+	public $actsAs = array('Search.Searchable');
+
+	/**
+	 * @var unknown
+	 */
+	public $filterArgs = array(
+		'author_id' => array('type' => 'subquery', 'method' => 'findByAuthors', 'field' => 'Post.author_id'),
+		'word' => array('type' => 'like', 'field' => array('Post.title', 'Post.body'), 'connectorAnd' => '+', 'connectorOr' => ','),
+		'from' => array('type' => 'value', 'field' => 'Post.created >='),
+		'to' => array('type' => 'value', 'field' => 'Post.created <='),
+	);
+
+/**
+ * multipleKeywords method
+ *
+ * @param string $keyword Input value
+ * @param null $andor
+ * @internal param string $option Advanced search and/or
+ * @return Value for the search process
+ */
+	public function multipleKeywords($keyword, $andor = null) {
+		$connector = ($andor === 'or') ? ',' : '+';
+		$keyword = preg_replace('/\s+/', $connector, trim(mb_convert_kana($keyword, 's', 'UTF-8')));
+		return $keyword;
+	}
+
+/**
+ * findByAuthors method
+ *
+ * @param array $data Data for a field.
+ * @param array $field Info for field.
+ * @return string Subquery
+ */
+	public function findByAuthors($data = array(), $field = array()) {
+		$this->Author->Behaviors->attach('Search.Searchable');
+		$query = $this->Author->getQuery('all', array(
+			'conditions' => array('Author.id' => explode('|', $data[$field['name']])),
+			'fields' => array('Author.id'),
+		));
+		return $query;
+	}
+
 /**
  * Validation rules
  *
@@ -14,8 +64,8 @@ class Post extends AppModel {
  */
 	public $validate = array(
 		'title' => array(
-			'notEmpty' => array(
-				'rule' => array('notEmpty'),
+			'notempty' => array(
+				'rule' => array('notempty'),
 				//'message' => 'Your custom message here',
 				//'allowEmpty' => false,
 				//'required' => false,
@@ -24,8 +74,8 @@ class Post extends AppModel {
 			),
 		),
 		'body' => array(
-			'notEmpty' => array(
-				'rule' => array('notEmpty'),
+			'notempty' => array(
+				'rule' => array('notempty'),
 				//'message' => 'Your custom message here',
 				//'allowEmpty' => false,
 				//'required' => false,
